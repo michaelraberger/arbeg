@@ -43,6 +43,7 @@
       "logo": "https://www.energie-ooe.at/assets/img/apple-touch-icon.png",
       "image": "https://www.energie-ooe.at/assets/img/og-image.jpg",
       "description": "Bürgerenergiegemeinschaft in Wels: Mitglieder teilen regional erzeugten Sonnenstrom zu fixen Preisen.",
+      "email": "info@energie-ooe.at",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Zeileisstraße 6",
@@ -292,8 +293,8 @@
   </section>
 
   <section class="section" id="anmelden" aria-labelledby="anmelden-titel">
-    <div class="wrap section-inner split">
-      <div class="stack" data-reveal="1">
+    <div class="wrap section-inner split split--form">
+      <div class="stack sticky-col" data-reveal="1">
         <span class="eyebrow">Anmeldung</span>
         <h2 class="h2" id="anmelden-titel">Jetzt unverbindlich anmelden</h2>
         <p class="lead">Fülle das Formular aus – wir melden uns innerhalb weniger Tage mit deinem Vertrag und allen weiteren Schritten.</p>
@@ -301,23 +302,131 @@
           <li>Zählpunktnummer (33-stellig, auf deiner Stromrechnung)</li>
           <li>Kontaktdaten</li>
           <li>Bezug, Einspeisung oder beides</li>
+          <li>IBAN für Abrechnung und Gutschriften</li>
         </ul>
       </div>
 
-      <!-- TODO: Link zum Anmeldeformular (z. B. Google-Forms-Einbettungs-URL) in data-form-url eintragen.
-           Solange das Attribut leer ist, wird der Hinweis "in Kürze verfügbar" angezeigt. -->
-      <div class="form-card" data-reveal="2" data-form-url="" data-form-height="640">
-        <div class="form-state" data-form-empty>
-          <h3>Online-Anmeldung in Kürze verfügbar</h3>
-          <p>Das Anmeldeformular wird gerade vorbereitet. Bis dahin erreichst du uns über die Kontaktdaten weiter unten.</p>
-          <a class="btn btn-outline btn-md" href="#kontakt">Zum Kontakt</a>
-        </div>
-        <div class="form-state" data-form-consent hidden>
-          <h3>Anmeldeformular</h3>
-          <p>Das Formular wird von einem externen Dienst (Google Forms) bereitgestellt. Beim Laden werden Daten an Google übertragen.</p>
-          <button class="btn btn-primary btn-md" type="button" data-form-load>Formular laden</button>
-          <p class="small">Mehr dazu in unserer <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
-        </div>
+      <div class="form-card" data-reveal="2">
+        <form class="join-form" id="beitrittsformular" action="beitritt.php" method="post">
+          <div class="form-alert" data-form-alert role="alert" hidden></div>
+
+          <fieldset>
+            <legend>Wie möchtest du teilnehmen?</legend>
+            <div class="choice-group">
+              <label class="choice"><input type="radio" name="teilnahme" value="bezug" checked required><span>Strom beziehen</span></label>
+              <label class="choice"><input type="radio" name="teilnahme" value="einspeisung"><span>Strom einspeisen</span></label>
+              <label class="choice"><input type="radio" name="teilnahme" value="beides"><span>Beides</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Persönliche Daten</legend>
+            <div class="field-grid">
+              <div class="field">
+                <label for="bf-vorname">Vorname</label>
+                <input id="bf-vorname" name="vorname" type="text" autocomplete="given-name" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="bf-nachname">Nachname</label>
+                <input id="bf-nachname" name="nachname" type="text" autocomplete="family-name" maxlength="80" required>
+              </div>
+              <div class="field field--full">
+                <label for="bf-strasse">Straße und Hausnummer</label>
+                <input id="bf-strasse" name="strasse" type="text" autocomplete="address-line1" maxlength="120" required>
+              </div>
+              <div class="field">
+                <label for="bf-plz">PLZ</label>
+                <input id="bf-plz" name="plz" type="text" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{4,5}" maxlength="5" required>
+              </div>
+              <div class="field">
+                <label for="bf-ort">Ort</label>
+                <input id="bf-ort" name="ort" type="text" autocomplete="address-level2" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="bf-telefon">Telefon</label>
+                <input id="bf-telefon" name="telefon" type="tel" autocomplete="tel" maxlength="30" required>
+              </div>
+              <div class="field">
+                <label for="bf-email">E-Mail</label>
+                <input id="bf-email" name="email" type="email" autocomplete="email" maxlength="120" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Stromanschluss</legend>
+            <div class="field-grid">
+              <div class="field field--full">
+                <label for="bf-netzbetreiber">Netzbetreiber</label>
+                <input id="bf-netzbetreiber" name="netzbetreiber" type="text" list="bf-netzbetreiber-liste" maxlength="80" required>
+                <datalist id="bf-netzbetreiber-liste">
+                  <option value="Wels Strom">
+                  <option value="Netz Oberösterreich">
+                  <option value="LINZ NETZ">
+                </datalist>
+              </div>
+            </div>
+            <div class="field-grid" data-show-for="bezug">
+              <div class="field field--full">
+                <label for="bf-zp-bezug">Zählpunktnummer Bezug</label>
+                <input id="bf-zp-bezug" name="zp_bezug" type="text" maxlength="45" autocapitalize="characters" spellcheck="false" aria-describedby="bf-zp-bezug-hinweis" data-zaehlpunkt data-required>
+                <span class="hint" id="bf-zp-bezug-hinweis">33 Zeichen, beginnt mit AT – steht auf deiner Stromrechnung.</span>
+              </div>
+              <div class="field field--full">
+                <label for="bf-verbrauch">Jahresverbrauch in kWh <span class="optional">(optional)</span></label>
+                <input id="bf-verbrauch" name="verbrauch" type="number" inputmode="numeric" min="0" max="9999999" step="1" aria-describedby="bf-verbrauch-hinweis">
+                <span class="hint" id="bf-verbrauch-hinweis">Ungefähr, laut letzter Jahresabrechnung.</span>
+              </div>
+            </div>
+            <div class="field-grid" data-show-for="einspeisung">
+              <div class="field field--full">
+                <label for="bf-zp-einspeisung">Zählpunktnummer Einspeisung</label>
+                <input id="bf-zp-einspeisung" name="zp_einspeisung" type="text" maxlength="45" autocapitalize="characters" spellcheck="false" aria-describedby="bf-zp-einspeisung-hinweis" data-zaehlpunkt data-required>
+                <span class="hint" id="bf-zp-einspeisung-hinweis">33 Zeichen, beginnt mit AT – steht auf deiner Einspeiseabrechnung.</span>
+              </div>
+              <div class="field field--full">
+                <label for="bf-kwp">Leistung der PV-Anlage in kWp</label>
+                <input id="bf-kwp" name="kwp" type="text" inputmode="decimal" pattern="[0-9]{1,4}([.,][0-9]{1,2})?" maxlength="8" data-required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Bankverbindung</legend>
+            <div class="field-grid">
+              <div class="field field--full">
+                <label for="bf-kontoinhaber">Kontoinhaber</label>
+                <input id="bf-kontoinhaber" name="kontoinhaber" type="text" maxlength="120" required>
+              </div>
+              <div class="field field--full">
+                <label for="bf-iban">IBAN</label>
+                <input id="bf-iban" name="iban" type="text" maxlength="42" autocapitalize="characters" spellcheck="false" aria-describedby="bf-iban-hinweis" data-iban required>
+                <span class="hint" id="bf-iban-hinweis">Für die monatliche Abrechnung und die Auszahlung von Gutschriften.</span>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="form-consent">
+            <label class="check">
+              <input type="checkbox" name="sepa" value="1" required>
+              <span>Ich erteile der AR Bürgerenergiegemeinschaft Wels ein SEPA-Lastschriftmandat laut <a href="agb.html#sepa">Punkt 9 der AGB</a>. Es gilt erst, wenn der Teilnahmevertrag zustande kommt.</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="zustimmung" value="1" required>
+              <span>Ich akzeptiere die <a href="agb.html">AGB</a> und habe die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen.</span>
+            </label>
+          </div>
+
+          <div class="form-trap" aria-hidden="true">
+            <label for="bf-fax">Dieses Feld bitte leer lassen</label>
+            <input id="bf-fax" name="rueckruf_fax" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="form-submit">
+            <button class="btn btn-primary" type="submit">Anmeldung absenden</button>
+            <p class="hint">Die Anmeldung ist unverbindlich. Verbindlich wird sie erst mit dem unterschriebenen Teilnahmevertrag.</p>
+          </div>
+        </form>
       </div>
     </div>
   </section>
@@ -372,12 +481,9 @@
         <strong>AR Bürgerenergiegemeinschaft Wels</strong>
         <span>Zeileisstraße 6</span>
         <span>4600 Wels</span>
-        <!-- TODO: E-Mail und Telefon eintragen und Block einkommentieren (auch im JSON-LD als "email"/"telephone" ergänzen)
         <span class="contact-links">
-          <a href="mailto:office@example.com">office@example.com</a>
-          <a href="tel:+43000000000">+43 000 000 000</a>
+          <a href="mailto:info@energie-ooe.at">info@energie-ooe.at</a>
         </span>
-        -->
       </address>
     </div>
   </section>
@@ -387,6 +493,7 @@
   <div class="wrap footer-inner">
     <span>© 2026 AR Bürgerenergiegemeinschaft Wels</span>
     <ul class="footer-links">
+      <li><a href="agb.html">AGB</a></li>
       <li><a href="impressum.html">Impressum</a></li>
       <li><a href="datenschutz.html">Datenschutz</a></li>
     </ul>

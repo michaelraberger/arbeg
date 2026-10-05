@@ -61,29 +61,102 @@
     });
   }
 
-  // --- Anmeldeformular (Zwei-Klick-Lösung) ---
-  // Die Formular-URL wird im HTML über data-form-url am Element .form-card gesetzt.
-  // Der iframe wird erst nach Klick geladen: keine Datenübertragung an den
-  // Formular-Anbieter ohne Zustimmung und kein Ballast beim Seitenaufbau.
-  var formCard = document.querySelector('.form-card[data-form-url]');
-  if (formCard) {
-    var url = (formCard.getAttribute('data-form-url') || '').trim();
-    var emptyState = formCard.querySelector('[data-form-empty]');
-    var consentState = formCard.querySelector('[data-form-consent]');
-    var loadButton = formCard.querySelector('[data-form-load]');
+  // --- Beitrittsformular ---
+  // Ohne JavaScript wird das Formular normal an beitritt.php gesendet;
+  // der Server prüft alle Eingaben noch einmal selbst.
+  var form = document.getElementById('beitrittsformular');
+  if (form) {
+    var alertBox = form.querySelector('[data-form-alert]');
+    var submitButton = form.querySelector('button[type="submit"]');
+    var submitLabel = submitButton.textContent;
 
-    if (/^https:\/\//.test(url) && consentState && loadButton) {
-      emptyState.hidden = true;
-      consentState.hidden = false;
-      loadButton.addEventListener('click', function () {
-        var iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.title = 'Anmeldeformular';
-        iframe.loading = 'lazy';
-        iframe.style.height = (parseInt(formCard.getAttribute('data-form-height'), 10) || 640) + 'px';
-        consentState.replaceWith(iframe);
-        iframe.focus();
+    function compact(value) {
+      return value.replace(/[\s.]/g, '').toUpperCase();
+    }
+
+    function validIban(value) {
+      var iban = compact(value);
+      if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) return false;
+      var digits = (iban.slice(4) + iban.slice(0, 4)).replace(/[A-Z]/g, function (c) {
+        return String(c.charCodeAt(0) - 55);
+      });
+      var rest = 0;
+      for (var i = 0; i < digits.length; i++) rest = (rest * 10 + Number(digits[i])) % 97;
+      return rest === 1;
+    }
+
+    function validZaehlpunkt(value) {
+      return /^AT[0-9A-Z]{31}$/.test(compact(value));
+    }
+
+    function bindCheck(selector, isValid, message) {
+      form.querySelectorAll(selector).forEach(function (input) {
+        input.addEventListener('input', function () {
+          input.setCustomValidity(input.value && !isValid(input.value) ? message : '');
+        });
       });
     }
+    bindCheck('[data-zaehlpunkt]', validZaehlpunkt, 'Die Zählpunktnummer beginnt mit AT und hat 33 Zeichen.');
+    bindCheck('[data-iban]', validIban, 'Bitte prüfe die IBAN – sie ist nicht gültig.');
+
+    // Nur die Felder zeigen, die zur gewählten Teilnahmeart gehören
+    function syncTeilnahme() {
+      var mode = form.querySelector('input[name="teilnahme"]:checked').value;
+      form.querySelectorAll('[data-show-for]').forEach(function (group) {
+        var show = mode === 'beides' || mode === group.getAttribute('data-show-for');
+        group.hidden = !show;
+        group.querySelectorAll('input').forEach(function (input) {
+          input.disabled = !show;
+          input.required = show && input.hasAttribute('data-required');
+        });
+      });
+    }
+    form.querySelectorAll('input[name="teilnahme"]').forEach(function (radio) {
+      radio.addEventListener('change', syncTeilnahme);
+    });
+    syncTeilnahme();
+
+    function showAlert(messages) {
+      alertBox.textContent = '';
+      alertBox.hidden = !messages;
+      if (!messages) return;
+      var intro = document.createElement('strong');
+      intro.textContent = 'Die Anmeldung konnte nicht gesendet werden.';
+      alertBox.appendChild(intro);
+      var list = document.createElement('ul');
+      messages.forEach(function (message) {
+        var item = document.createElement('li');
+        item.textContent = message;
+        list.appendChild(item);
+      });
+      alertBox.appendChild(list);
+      alertBox.scrollIntoView({ block: 'center' });
+    }
+
+    form.addEventListener('submit', function (e) {
+      if (!window.fetch || !window.FormData) return;
+      e.preventDefault();
+      showAlert(null);
+      var data = new FormData(form);
+      submitButton.disabled = true;
+      submitButton.textContent = 'Wird gesendet …';
+
+      fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
+        .then(function (response) { return response.json(); })
+        .then(function (result) {
+          if (result.ok) {
+            window.location.href = 'danke.html';
+            return;
+          }
+          showAlert(result.errors || ['Bitte versuche es noch einmal.']);
+        })
+        .catch(function () {
+          showAlert(['Bitte versuche es später noch einmal oder schreib uns an info@energie-ooe.at.']);
+        })
+        .then(function () {
+          submitButton.disabled = false;
+          submitButton.textContent = submitLabel;
+        });
+    });
   }
 })();
