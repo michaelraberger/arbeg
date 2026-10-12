@@ -64,6 +64,7 @@ function antworten(bool $ok, array $fehler = [], int $status = 200): void
         $punkte .= '<li>' . htmlspecialchars($meldung, ENT_QUOTES, 'UTF-8') . '</li>';
     }
     echo '<!DOCTYPE html><html lang="de-AT"><head><meta charset="utf-8">'
+        . "<script src='https://webcachex-eu.datareporter.eu/loader/v6/cmp-load.js?url=89eba99a-2e81-495a-b88c-23c2c6ba5430.RL9sq9yVPXdo.anW' defer></script>"
         . '<meta name="viewport" content="width=device-width, initial-scale=1">'
         . '<meta name="robots" content="noindex">'
         . '<title>Anmeldung nicht gesendet – AR Bürgerenergiegemeinschaft Wels</title>'
